@@ -1,0 +1,10 @@
+name: ${project.name}
+main: com.andune.minecraft.blockowner.BlockOwner
+url: ${project.url}
+version: ${project.version}
+author: andune
+softdepend: [Vault, WorldEdit]
+commands:
+  bosave:
+  boq:
+  boa:

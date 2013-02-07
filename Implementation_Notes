@@ -1,0 +1,60 @@
+Three different implementations were considered for how to efficiencly store & process the block owner data.
+
+The simplest approach would be to store the owner data as some simple notation such as JSON or YAML.
+
+  Advantages:
+    Externally readable/editable files
+    Easy to understand code (even Bukkit programming newbies know how to work with YAML), which gives the
+      project maximum chance to live on and be supported by others down the road
+    Reasonably fast access - both JSON and YAML implementations internally use HashMaps for key/value
+      stores, so the lookup time would be reasonably fast
+
+  Disadvantages:
+    Slow - Reading/Parsing/Writing YAML or JSON files everytime a chunk is loaded/unloaded will be slow
+      and expensive on CPU resources. The CPU cost disadvantage is somewhat mitigated by being offloaded
+      onto a thread, most MC servers have multiple unused cores laying around. But it remains that it
+      would likely be a slow process, always lagging behind Bukkit loads a bit, meaning the chance is high
+      that blocks will be changed in chunks whose ownership map hasn't loaded yet.
+    Memory intensive - Unless tuning was done to convert the in-memory format to something more efficient,
+      the default in-memory access for either YAML or JSON is likely to be fairly memory intensive (lots
+      of Strings)
+
+
+The fastest approach would be to store a fully allocated array of 16-bit ints that represent the owner.
+
+  Advantages:
+    Fast Lookup - every owner lookup is a single memory access away, the fastest possible operation for
+      retrieving data from memory (no hash lookup required)
+    Fast Load/Write - the data can be written and read as a solid bytestream and needs no additional
+      processing for these operations
+
+  Disadvantages:
+    Memory intensive - Every loaded chunk would consume another 131k (16x*16z*256y*2bytes). For a single
+      player with the default chunk radius of 10, this would result in an additional 57MB of memory being
+      consumed for every non-overlapping player on a server. This might be fine on a server with gobs
+      of memory to spare, but that's certainly not the common case for MineCraft servers.
+
+The most memory efficient approach is to only store blocks that have an owner in a primite Java hash,
+with a 32-bit int as the key for the location and a 16-bit short as the owner.
+Since the majority of blocks in a chunk have no owner, this results a drastic reduction in data size. The
+primitive hash gives us the smallest memory and fastest processing footprint possible (as compared to
+using autoboxed Java Number objects).
+
+  Advantages:
+    Reasonbly fast access - every lookup is only a single hash operation away. Hash operations aren't as
+      fast as a simple memory lookup, but they are the next best thing for sparsely stored data.
+    Fast serialization - No additional processing required for read/write, the data can be read and
+      written as raw key/value pairs.
+    Good memory utilization - we can allocate memory for only the blocks that have owners. If we assume
+      that roughly 5% of all loaded blocks are owned (this is 3250 blocks per chunk, which is probably
+      a very high estimate), this works out to roughly 8.5MB per player of overhead. Further assuming
+      about a 50% chunk overlap on average, this number is further reduced to 4.25MB per player. My
+      guess is that the 5% block ownership number is extremely high and that in practice some number
+      less than 1% are actually owned (consider a player works on 1 chunk at a time but has 441 chunks
+      loaded around him/her); if this assumption holds up then the actual memory usage is only 1/5th
+      of the 4.25MB number, meaning keeping ownership data in memory will require < 1MB of RAM per
+      player.
+
+  Disadvantages:
+    Other than not having some of the advantages of other options (such as externally editable files or
+      the fastest possible read times) there are no disadvantages to this option.
