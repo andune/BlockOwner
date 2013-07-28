@@ -49,7 +49,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class BlockOwner extends JavaPlugin
 {
-    private final Logger log = LoggerFactory.getLogger(BlockOwner.class);
+    private Logger log;
 
 	private JarUtils jarUtils;
 	private String buildNumber = "unknown";
@@ -57,6 +57,9 @@ public class BlockOwner extends JavaPlugin
 	
 	@Override
 	public void onEnable() {
+        LoggerFactory.setLoggerPrefix("[BlockOwner] ");
+        log = LoggerFactory.getLogger(BlockOwner.class);
+
     	jarUtils = new JarUtils(getDataFolder(), getFile());
 		buildNumber = jarUtils.getBuild();
 
