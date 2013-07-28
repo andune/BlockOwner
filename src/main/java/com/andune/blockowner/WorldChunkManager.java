@@ -63,6 +63,11 @@ public class WorldChunkManager {
 	public String getWorld() {
 	    return world;
 	}
+
+    public boolean isChunkLoaded(final int x, final int z) {
+        final long chunkKey = (x << 16) | (z & 0xFFFF);
+        return chunkMap.containsKey(chunkKey);
+    }
 	
 	public void loadChunk(final int x, final int z) {
         final long chunkKey = (x << 16) | (z & 0xFFFF);

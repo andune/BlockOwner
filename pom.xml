@@ -59,6 +59,13 @@
             <artifactId>commonBukkitlib</artifactId>
             <version>0.5-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>de.diddiz</groupId>
+            <artifactId>logblock</artifactId>
+            <version>1.70</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -110,6 +117,8 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.carrotsearch:hppc</include>
+                                    <include>com.andune.minecraft.commonlib:commonlib</include>
+                                    <include>com.andune.minecraft.commonlib:commonBukkitlib</include>
                                 </includes>
                             </artifactSet>
 
@@ -155,7 +164,7 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                         <manifestEntries>
-                            <Implementation-Build>${buildNumber}</Implementation-Build>
+                            <Implementation-Build>${build.number}</Implementation-Build>
                         </manifestEntries>
                     </archive>
                 </configuration>
