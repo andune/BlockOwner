@@ -5,6 +5,8 @@ package com.andune.minecraft.blockowner;
 
 import java.util.HashMap;
 
+import com.andune.minecraft.commonlib.Logger;
+import com.andune.minecraft.commonlib.LoggerFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -16,13 +18,12 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
-import com.andune.minecraft.blockowner.util.Debug;
-
 /**
  * @author andune
  *
  */
 public class GlobalChunkManager implements Listener {
+    private final Logger log = LoggerFactory.getLogger(GlobalChunkManager.class);
     private final HashMap<String, WorldChunkManager> worldManagers = new HashMap<String, WorldChunkManager>(10);
     private final ChunkStorage chunkStorage;
     private final Owners owners;
@@ -30,7 +31,7 @@ public class GlobalChunkManager implements Listener {
     /**
      * 
      * @param chunkStorage the chunkStorage system to use
-     * @param loadedWorlds the worlds to ready when the instance is created
+     * @param owners
      */
     public GlobalChunkManager(ChunkStorage chunkStorage, Owners owners) {
         this.chunkStorage = chunkStorage;
@@ -89,8 +90,7 @@ public class GlobalChunkManager implements Listener {
         	}
         }
     	long endTime = System.currentTimeMillis();
-    	Debug.getInstance().debug("Loaded ", chunks, " chunk data in ",
-    			(endTime-startTime), " milliseconds");
+    	log.debug("Loaded {} chunk data in {} milliseconds", chunks, (endTime-startTime));
     }
     
     @EventHandler
@@ -133,7 +133,7 @@ public class GlobalChunkManager implements Listener {
      */
     public void saveAll() {
         for(WorldChunkManager wcm : worldManagers.values()) {
-            Debug.getInstance().debug("saving world ",wcm.getWorld());
+            log.debug("saving world {}", wcm.getWorld());
             wcm.saveAll();
         }
     }

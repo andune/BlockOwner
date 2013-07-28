@@ -13,9 +13,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Formatter;
 
+import com.andune.minecraft.commonlib.Logger;
+import com.andune.minecraft.commonlib.LoggerFactory;
 import org.bukkit.plugin.Plugin;
 
-import com.andune.minecraft.blockowner.util.Debug;
 import com.carrotsearch.hppc.IntShortOpenHashMap;
 
 /**
@@ -31,16 +32,19 @@ import com.carrotsearch.hppc.IntShortOpenHashMap;
  *
  */
 public class FileChunkStorage implements ChunkStorage {
+    private final Logger log = LoggerFactory.getLogger(FileChunkStorage.class);
 	private final File worldContainer;
+
 	public FileChunkStorage(Plugin plugin) {
 		this.worldContainer = plugin.getServer().getWorldContainer();
 	}
 	
     /**
      * Return the region directory and create it if it doesn't exist.
-     * 
+     *
+     * @param worldName
      * @param chunkX
-     * @param chunkY
+     * @param chunkZ
      * @return
      */
     private File getRegionDirectory(String worldName, int chunkX, int chunkZ) {
@@ -92,7 +96,7 @@ public class FileChunkStorage implements ChunkStorage {
         
         // if no file exists, just initialize a small-capacity map
         if( !f.exists() ) {
-        	Debug.getInstance().debug("load on chunk "+chunk+", no file exists, initializing empty dataset");
+        	log.debug("load on chunk {}, no file exists, initializing empty dataset", chunk);
             chunk.map = new IntShortOpenHashMap(100);
             return;
         }
@@ -114,11 +118,11 @@ public class FileChunkStorage implements ChunkStorage {
                 int key = is.readInt();
                 short value = is.readShort();
                 chunk.map.put(key, value);
-                if( Debug.getInstance().isDebug() ) {
+                if( log.isDebugEnabled() ) {
                     Formatter format = new Formatter();
                     format.format("loaded chunk{%d,%d} owner %d for key %x",
                     		chunk.x, chunk.z, value, key);
-    		        Debug.getInstance().debug(format.toString());
+    		       log.debug(format.toString());
     		        format.close();
                 }
             }

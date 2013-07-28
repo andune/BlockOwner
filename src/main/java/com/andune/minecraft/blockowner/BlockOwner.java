@@ -7,9 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import com.andune.minecraft.commonlib.JarUtils;
+import com.andune.minecraft.commonlib.Logger;
+import com.andune.minecraft.commonlib.LoggerFactory;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -19,33 +20,29 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.andune.minecraft.blockowner.util.Debug;
-import com.andune.minecraft.blockowner.util.JarUtils;
-
 public class BlockOwner extends JavaPlugin
 {
-	private static final Logger log = Logger.getLogger(BlockOwner.class.toString());
-	private static final String logPrefix = "[BlockOwner] ";
-	
-	private Debug debug;
+    private final Logger log = LoggerFactory.getLogger(BlockOwner.class);
+
 	private JarUtils jarUtils;
-	private int buildNumber = -1;
+	private String buildNumber = "unknown";
 	private GlobalChunkManager globalChunkManager;
 	
 	@Override
 	public void onEnable() {
-    	Debug.getInstance().init(log, logPrefix, "plugins/BlockOwner/debug.log", false);
-		debug = Debug.getInstance();
-    	jarUtils = new JarUtils(this, getFile(), log, logPrefix);
-		buildNumber = jarUtils.getBuildNumber();
-		Debug.getInstance().setDebug(getConfig().getBoolean("debug", false));
-		
+    	jarUtils = new JarUtils(getDataFolder(), getFile());
+		buildNumber = jarUtils.getBuild();
+
+        File debugFlagFile = new File(getDataFolder(), "debug");
+        if (debugFlagFile.exists())
+            LoggerFactory.getLogUtil().enableDebug("com.andune.blockowner");
+
 		Owners owners = new Owners(new YamlConfiguration(), new File(getDataFolder(), "owners.yml"));
 		try {
 			owners.loadConfig();
 		}
 		catch(Exception e) {
-			log.log(Level.SEVERE, "Error loading owners: "+e.getMessage(), e);
+			log.error("Error loading owners", e);
 		}
 		
 		globalChunkManager = new GlobalChunkManager(new FileChunkStorage(this), owners);
@@ -53,12 +50,12 @@ public class BlockOwner extends JavaPlugin
 		getServer().getPluginManager().registerEvents(new BlockListener(globalChunkManager), this);
 		getServer().getPluginManager().registerEvents(new PlayerListener(globalChunkManager), this);
 		
-		info("version "+getDescription().getVersion()+", build "+buildNumber+" is enabled");
+		log.info("version "+getDescription().getVersion()+", build "+buildNumber+" is enabled");
 	}
 	
 	@Override
 	public void onDisable() {
-		info("version "+getDescription().getVersion()+", build "+buildNumber+" is disabled");
+		log.info("version "+getDescription().getVersion()+", build "+buildNumber+" is disabled");
 	}
 	
 	@Override
@@ -150,7 +147,7 @@ public class BlockOwner extends JavaPlugin
 	            		break;
 	            }
 	            long endTime = System.currentTimeMillis();
-	            Debug.getInstance().debug("/boa total time running = "+(endTime-startTime)+"ms (total blocks checked "+blocksChecked+")");
+	            log.debug("/boa total time running = {}ms (total blocks checked {})", (endTime-startTime), blocksChecked);
 	            sender.sendMessage("/boa total time running = "+(endTime-startTime)+"ms (total blocks checked "+blocksChecked+")");
 	        }
 	    }
@@ -161,11 +158,13 @@ public class BlockOwner extends JavaPlugin
 	 * 
 	 * @param msg
 	 */
+    /*
 	public void info(String msg) {
-		log.info(logPrefix+msg);
+		log.info(msg);
 	}
 	
 	public void debug(Object...args) {
 		debug.debug(args);
 	}
+	*/
 }

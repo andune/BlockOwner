@@ -6,7 +6,8 @@ package com.andune.minecraft.blockowner;
 import java.util.Formatter;
 
 
-import com.andune.minecraft.blockowner.util.Debug;
+import com.andune.minecraft.commonlib.Logger;
+import com.andune.minecraft.commonlib.LoggerFactory;
 import com.carrotsearch.hppc.IntShortOpenHashMap;
 
 /**
@@ -14,6 +15,8 @@ import com.carrotsearch.hppc.IntShortOpenHashMap;
  *
  */
 public class Chunk {
+    private final Logger log = LoggerFactory.getLogger(Chunk.class);
+
     protected final int x;
     protected final int z;
     protected final String world;
@@ -43,11 +46,11 @@ public class Chunk {
         if( value != 0 )
             owner = owners.getOwnerById(value);
         
-        if( Debug.getInstance().isDebug() ) {
+        if( log.isDebugEnabled() ) {
             Formatter f = new Formatter();
 	        f.format("chunk getOwner(): chunk {%d,%d} location {%d,%d,%d,key=%x} owner is %d (%s)",
 	        		this.x, this.z, x, y, z, key, value, owner);
-	        Debug.getInstance().debug(f.toString());
+	       log.debug(f.toString());
 	        f.close();
         }
 
@@ -64,17 +67,17 @@ public class Chunk {
         
         if( owner != null ) {
             map.put(key, ownerId);
-            if( Debug.getInstance().isDebug() ) {
+            if( log.isDebugEnabled() ) {
                 Formatter f = new Formatter();
 		        f.format("chunk owner chunk {%d,%d} location {%d,%d,%d,key=%x} set to %d",
 		        		this.x, this.z, x, y, z, key, ownerId);
-		        Debug.getInstance().debug(f.toString());
+		        log.debug(f.toString());
 		        f.close();
             }
         }
         else {
             map.remove(key);        // remove owner
-            Debug.getInstance().debug("chunk owner {",x,",",y,",",z,"} removed");
+            log.debug("chunk owner {{},{},{}} removed", x, y, z);
         }
     }
     
