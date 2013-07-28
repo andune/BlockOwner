@@ -3,23 +3,29 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.andune.minecraft.blockowner</groupId>
+    <groupId>com.andune.blockowner</groupId>
     <artifactId>BlockOwner</artifactId>
-    <version>0.1</version>
+    <version>0.2-SNAPSHOT</version>
     <name>BlockOwner</name>
     <description>BlockOwner keeps track of the owner of individual blocks</description>
     <url>https://dev.bukkit.org/server-mods/BlockOwner/</url>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+        <build.number>${maven.build.timestamp}</build.number>
+    </properties>
+
     <scm>
-        <connection>scm:git:git://github.com/morganm/BlockOwner.git</connection>
-        <url>https://github.com/morganm/BlockOwner</url>
-        <developerConnection>scm:git:git@github.com:morganm/BlockOwner.git</developerConnection>
+        <connection>scm:git:git://github.com/andune/BlockOwner.git</connection>
+        <url>https://github.com/andune/BlockOwner</url>
+        <developerConnection>scm:git:git@github.com:andune/BlockOwner.git</developerConnection>
     </scm>
 
     <repositories>
         <repository>
-            <id>morganm-repo</id>
-            <url>http://morganmc.dyndns.org/nexus/content/groups/public/</url>
+            <id>andune-repo</id>
+            <url>http://andune.com/nexus/content/groups/public/</url>
         </repository>
         <repository>
             <id>bukkit-repo</id>
@@ -28,49 +34,30 @@
     </repositories>
 
     <dependencies>
-        <!-- Required component -->
-        <dependency>
-            <groupId>com.nijiko</groupId>
-            <artifactId>permissions</artifactId>
-            <version>2.7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ru.tehkode</groupId>
-            <artifactId>PermissionsEx</artifactId>
-            <version>1.19.1</version>
-        </dependency>
-
-        <!-- WorldEdit/WEPIF -->
-        <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldedit</artifactId>
-            <version>5.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spout</groupId>
-                    <artifactId>spoutapi</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>net.milkbowl.vault</groupId>
-            <artifactId>Vault</artifactId>
-            <version>1.2.15</version>
-        </dependency>
-
         <!-- Bukkit -->
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.4.7-R1.0</version>
+            <version>1.6.2-R0.1-SNAPSHOT</version>
         </dependency>
 
+        <!-- High performance native hash implementation -->
         <dependency>
             <groupId>com.carrotsearch</groupId>
             <artifactId>hppc</artifactId>
-            <version>0.4.2</version>
+            <version>0.5.0</version>
+        </dependency>
+
+        <!-- Common libraries -->
+        <dependency>
+            <groupId>com.andune.minecraft.commonlib</groupId>
+            <artifactId>commonlib</artifactId>
+            <version>0.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.andune.minecraft.commonlib</groupId>
+            <artifactId>commonBukkitlib</artifactId>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -85,14 +72,6 @@
                 <directory>${basedir}/src/main/resources/</directory>
             </resource>
             <resource>
-                <targetPath>.</targetPath>
-                <directory>${basedir}</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>build.number</include>
-                </includes>
-            </resource>
-            <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
@@ -103,25 +82,6 @@
 
         <!-- Plugins -->
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version><!--$NO-MVN-MAN-VER$-->
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <buildnumber />
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- Compile plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -139,7 +99,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>1.7.1</version>
+                <version>2.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -147,7 +107,6 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <includes>
                                     <include>com.carrotsearch:hppc</include>
@@ -164,18 +123,20 @@
                                           </filters>
                             -->
 
-                            <!--
-                                          <relocations>
-                                            <relocation>
-                                              <pattern>org.reflections</pattern>
-                                              <shadedPattern>${project.groupId}.${project.artifactId}.shade.reflections</shadedPattern>
-                                            </relocation>
-                                            <relocation>
-                                              <pattern>com.andune.minecraft.commonlib</pattern>
-                                              <shadedPattern>${project.groupId}.${project.artifactId}.shade.commonlib</shadedPattern>
-                                            </relocation>
-                                          </relocations>
-                            -->
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.carrotsearch</pattern>
+                                    <shadedPattern>${project.groupId}.shade.carrotsearch</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.reflections</pattern>
+                                    <shadedPattern>${project.groupId}.shade.reflections</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.andune.minecraft.commonlib</pattern>
+                                    <shadedPattern>${project.groupId}.shade.commonlib</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -199,17 +160,6 @@
                     </archive>
                 </configuration>
             </plugin>
-
-            <!-- Assembly -->
-            <!--
-                  <plugin>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.2-beta-2</version>
-                    <configuration>
-                      <descriptor>${basedir}/src/main/assembly/default.xml</descriptor>
-                    </configuration>
-                  </plugin>
-            -->
 
             <!-- Release -->
             <plugin>
